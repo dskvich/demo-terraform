@@ -1,3 +1,14 @@
+terraform {
+  backend "s3" {
+    bucket = "terraform-dmsu0215"
+    key = "stage/services/webserver-cluster/terraform.tfstate"
+    region = "us-east-2"
+
+    dynamodb_table = "terraform-dmsu0215-locks"
+    encrypt = true
+  }
+}
+
 provider "aws" {
   region = "us-east-2"
 }
@@ -29,17 +40,6 @@ resource "aws_security_group" "instance" {
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
-
-variable "server_port" {
-  description = "The port the server will use for HTTP requests"
-  type = number
-  default = 8080
-}
-
-output "public_ip" {
-  value = aws_instance.example.public_ip
-  description = "The public IP address of the web server"
 }
 
 resource "aws_launch_configuration" "example" {
@@ -157,9 +157,4 @@ resource "aws_lb_listener_rule" "asg" {
     type = "forward"
     target_group_arn = aws_lb_target_group.asg.arn
   }
-}
-
-output "alb_dns_name" {
-  value = aws_lb.example.dns_name
-  description = "The domain name of the load balancer"
 }
