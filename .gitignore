@@ -2,3 +2,4 @@
 .idea
 *.tfstate
 *.tfstate.backup
+**/*.lock.hcl
