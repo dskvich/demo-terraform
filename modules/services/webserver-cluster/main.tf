@@ -4,8 +4,8 @@ resource "aws_security_group" "instance" {
   ingress {
     from_port = var.server_port
     to_port = var.server_port
-    protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    protocol = local.tcp_protocol
+    cidr_blocks = [local.all_ips]
   }
 }
 
@@ -62,7 +62,7 @@ resource "aws_lb" "example" {
 
 resource "aws_lb_listener" "example" {
   load_balancer_arn = aws_lb.example.id
-  port = 80
+  port = local.http_port
   protocol = "HTTP"
 
   default_action {
@@ -81,18 +81,18 @@ resource "aws_security_group" "alb" {
 
   # Allow inbound HTTP requests
   ingress {
-    from_port = 80
-    to_port = 80
-    protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port = local.http_port
+    to_port = local.http_port
+    protocol = local.tcp_protocol
+    cidr_blocks = [local.all_ips]
   }
 
   # Allow all outbound requests
   egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port = local.any_port
+    to_port = local.any_port
+    protocol = local.any_protocol
+    cidr_blocks = [local.all_ips]
   }
 }
 
@@ -133,4 +133,12 @@ data "terraform_remote_state" "db" {
     key = var.db_remote_state_key
     region = "us-east-2"
   }
+}
+
+locals {
+  http_port = 80
+  any_port = 0
+  any_protocol = "-1"
+  tcp_protocol = "tcp"
+  all_ips = ["0.0.0.0/0"]
 }
